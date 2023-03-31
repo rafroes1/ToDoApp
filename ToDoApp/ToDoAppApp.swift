@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct ToDoAppApp: App {
-    let persistenceController = PersistenceController.shared
+    @StateObject private var persistenceController = PersistenceController()
 
     var body: some Scene {
         WindowGroup {
