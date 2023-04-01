@@ -22,10 +22,14 @@ struct AddToDoView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Form {
+                VStack (alignment: .leading, spacing: 20) {
                     // MARK: - To Do Name
 
                     TextField("To Do", text: $name)
+                        .padding()
+                        .background(Color(UIColor.tertiarySystemFill))
+                        .cornerRadius(9)
+                        .font(.system(size: 24, weight: .bold, design: .default))
 
                     // MARK: - To Do Priority
 
@@ -59,8 +63,16 @@ struct AddToDoView: View {
                         self.presentationMode.wrappedValue.dismiss()
                     }, label: {
                         Text("Save")
+                            .font(.system(size: 24, weight: .bold, design: .default))
+                            .padding()
+                            .frame(minWidth: 0, maxWidth: .infinity)
+                            .background(.blue)
+                            .cornerRadius(9)
+                            .foregroundColor(.white)
                     })
-                } //: Form
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 30)
 
                 Spacer()
             } //: VStack
