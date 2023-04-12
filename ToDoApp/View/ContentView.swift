@@ -12,10 +12,15 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) var managedObjectContext
 
     @FetchRequest(sortDescriptors: [SortDescriptor(\.name)]) var todos: FetchedResults<ToDo>
+    
+    @EnvironmentObject var iconSettings: IconNames
 
     @State private var showingAddToDoView: Bool = false
     @State private var animatedButton: Bool = false
     @State private var showingSettingsView: Bool = false
+    
+    @ObservedObject var theme = ThemeSettings.shared
+    var themes: [Theme] = themeData
 
     // MARK: - Functions
 
@@ -31,6 +36,19 @@ struct ContentView: View {
             }
         }
     }
+    
+    private func colorize(priority: String) -> Color {
+        switch priority {
+        case "High":
+            return .pink
+        case "Normal":
+            return .green
+        case "Low":
+            return .blue
+        default:
+            return .gray
+        }
+    }
 
     var body: some View {
         NavigationView {
@@ -38,26 +56,39 @@ struct ContentView: View {
                 List {
                     ForEach(self.todos, id: \.self) { todo in
                         HStack {
+                            Circle()
+                                .frame(width: 12, height: 12, alignment: .center)
+                                .foregroundColor(self.colorize(priority: todo.priority ?? "Normal"))
                             Text(todo.name ?? "Unkown")
+                                .fontWeight(.semibold)
 
                             Spacer()
 
                             Text(todo.priority ?? "Unkown")
+                                .font(.footnote)
+                                .foregroundColor(Color(UIColor.systemGray2))
+                                .padding(3)
+                                .frame(minWidth: 62)
+                                .overlay(
+                                    Capsule().stroke(Color(UIColor.systemGray2), lineWidth: 0.75)
+                                )
                         }
+                        .padding(.vertical, 10)
                     }
                     .onDelete(perform: deleteToDo)
                 } //: List
                 .navigationBarTitle("To Do", displayMode: .inline)
                 .navigationBarItems(
-                    leading: EditButton(),
+                    leading: EditButton().accentColor(themes[self.theme.themeSettings].themeColor),
                     trailing:
                         Button(action: {
                             self.showingSettingsView.toggle()
                         }) {
                             Image(systemName: "paintbrush")
+                                .foregroundColor(themes[self.theme.themeSettings].themeColor)
                         } //: Add button
                         .sheet(isPresented: $showingSettingsView, content: {
-                            SettingsView()
+                            SettingsView().environmentObject(self.iconSettings)
                         })
                 )
                 
@@ -73,12 +104,12 @@ struct ContentView: View {
                 ZStack {
                     Group {
                         Circle()
-                            .fill(.blue)
+                            .fill(themes[self.theme.themeSettings].themeColor)
                             .opacity(self.animatedButton ? 0.2 : 0)
                             .scaleEffect(self.animatedButton ? 1 : 0)
                             .frame(width: 68, height: 68, alignment: .center)
                         Circle()
-                            .fill(.blue)
+                            .fill(themes[self.theme.themeSettings].themeColor)
                             .opacity(self.animatedButton ? 0.15 : 0)
                             .scaleEffect(self.animatedButton ? 1 : 0)
                             .frame(width: 88, height: 88, alignment: .center)
@@ -94,6 +125,7 @@ struct ContentView: View {
                             .background(Circle().fill(Color("ColorBase")))
                             .frame(width: 48, height: 48, alignment: .center)
                     })
+                    .foregroundColor(themes[self.theme.themeSettings].themeColor)
                     .onAppear(perform: {
                         self.animatedButton.toggle()
                     })
@@ -103,6 +135,7 @@ struct ContentView: View {
                 , alignment: .bottomTrailing
             )
         } //: NavigationView
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
